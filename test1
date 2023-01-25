@@ -1,0 +1,20 @@
+#!/bin/bash
+# name="1 #$  true no& nn4()-sad "
+# name="da"
+# # echo $name
+# # for i in $name
+# # do 
+# if [[ $name =~ ^[a-zA-Z]{1,}$ ]];then
+#     echo $name
+# fi
+# # done
+
+
+for i in $(ls ./DBMS)
+do 
+
+# echo $i
+if [[ $i == "n" ]];then
+echo $i
+fi
+done

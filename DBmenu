@@ -1,0 +1,95 @@
+#!/bin/bash
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+# echo "${red}red text ${green}green ${reset}text"
+
+listDatabase(){
+dir="./DBMS"
+res=''
+db=$(ls -l ./DBMS | wc -l)
+if find -- "$dir" -prune -type d -empty | grep -q '^'; then
+    res="${red} no databases yet${reset}" 
+else
+    res=$(ls -l ./DBMS | grep "^d" |cut -d ' ' -f9)
+fi
+    echo "============ ${green}Databases${reset} ==============="
+    echo "${green}$res ${reset}"
+    echo "======================================"
+    . ./DBmenu
+}
+
+createDatabase(){
+read -p "${green}Enter database name : ${reset}" name
+if [[ -z $name ]];then
+echo "
+===============================================
+${red}database name can not be empty ${reset}
+===============================================" 
+elif [[ -d ./DBMS/$name ]];then
+echo "
+===============================================
+${red}there is database with same name  ${reset}
+===============================================" 
+elif [[ $name =~ ^[a-zA-Z]{1,}$ ]];then
+mkdir ./DBMS/$name
+echo "${green}$name created successfully ${reset}"
+
+else 
+echo "${red}not vaild name ${reset}"
+
+fi
+
+}
+
+dropDatabase(){
+    del=0 
+read -p "${red}enter DB name to Drop : ${reset}" name
+for i in $(ls ./DBMS)
+do 
+if [[ $i ==  $name ]];then
+    rm -r ./DBMS/$name
+    del=1
+fi
+done
+
+
+if [[ $del == 1 ]];then
+echo "==============================="
+echo "${green}$name ${red} deleted ${reset} "
+echo "==============================="
+else
+echo "==============================="
+echo "${red}$name not found ${reset} "
+echo "==============================="
+
+fi
+. ./DBmenu
+}
+
+PS3="Enter a choice: "
+
+select op in  createDB listDB connectToDB dropDB quit ;do
+    case $op in 
+    createDB)
+    createDatabase
+    ;;
+    listDB)
+    listDatabase
+    ;;
+    connectToDB)
+    echo connect To DB
+    ;;
+    dropDB)
+    dropDatabase
+    ;;
+    quit)
+    exit
+    ;;
+    *)
+    echo invaild Input
+    esac
+done
+
+
+

@@ -1,0 +1,35 @@
+#!/bin/bash
+createDBFolder(){
+    db="DBMS"
+    if [[ -d $db ]];then
+   echo Welcome
+    else
+    mkdir DBMS
+    fi
+. ./DBmenu
+}
+
+createDBFolder
+
+# checkExist(){
+
+# if [[ $1 = "dir" ]];then
+
+#         if [[ -d  $2 ]];then
+#         echo $2
+#         else
+
+#         echo dir not found
+#         fi
+# elif [[ $1 = "file" ]];then
+#         if [[ -f  $2 ]] ;then
+#             echo $2
+#             else
+
+#             echo file not found
+#             fi
+# fi            
+    
+# }
+
+# # checkExist dir DB
