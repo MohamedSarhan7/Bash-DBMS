@@ -13,7 +13,7 @@ colname=$1
 
 TableData(){
     read -p "${green}Enter number of column in $tablename : ${reset}" col
-    if [[ $col =~ ^[1-9] ]];then
+    if [[ $col =~ ^[1-9]{1,}$ ]];then
         echo  "meta : TN : "$tablename >> ./DBMS/$DBNAME/meta_$tablename/meta
         echo  "meta : CN : "$col       >> ./DBMS/$DBNAME/meta_$tablename/meta
         echo  "===================================="
@@ -41,7 +41,7 @@ TableData(){
                             echo "Wrong Choice!!!" ;;
                             esac
                         done
-            echo "Not primary key : $index : $colname : $datatype " >> ./DBMS/$DBNAME/meta_$tablename/meta
+            echo "Normal Field : $index : $colname : $datatype " >> ./DBMS/$DBNAME/meta_$tablename/meta
             printf "$colname:" >> ./DBMS/$DBNAME/$tablename
             index=$(($index+1))
         done
@@ -128,6 +128,103 @@ fi
 Main
 }
 
+vaildInput() {
+    stat=0
+    if [[ $1 = "int" ]];then
+        # while [[ $stat = 0 ]];do
+            if  [[ $2 =~ ^[1-9]{1,}$ ]];then
+                # stat=1
+                return 0
+            else
+                echo "${red}invaild input only numbers {1,9}${reset}"
+                return 1
+            
+            fi    
+        # done 
+    elif [[ $1 = "str" ]];then
+        #   while [[ $stat = 0 ]];do
+            if  [[ $2 =~ ^[a-zA-Z]{1,}$ ]];then
+                # stat=1
+                return 0
+            else
+                echo "${red}invaild input only string ${reset}"
+                return 1
+            
+            fi    
+        # done
+
+    fi
+
+}
+vaildPK(){
+    pk=(`awk -F":" '{print $1}' ./DBMS/$DBNAME/$tablename`)
+    pkSize=${#pk[*]}
+    for (( k = 0 ; k < $pkSize ; k++ ));do
+    if [[  $1 == ${pk[$k]}  ]];then
+        echo "${red}Primary  key can't be duplicated${reset}"
+        echo "${green}try again );${reset}"
+        
+        Main
+        
+    
+    fi
+    
+    done
+
+
+}
+InsertIntoTable(){
+    table=0 
+read -p "${green}enter table name: ${reset}" tablename
+for i in $(ls ./DBMS/$DBNAME);do 
+    if [[ $i ==  $tablename ]];then
+            table=1
+    fi
+done
+
+if [[ $table == 0 ]];then
+    echo "============================="
+    echo  $red $tablename not found $reset 
+    echo "============================="
+else
+    
+    fieldsArr=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+    dataTypeArr=(`awk -F":" '{if (NR>=3) print $4}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+    # declare -a newRowArr  
+    # ${#array[*]}
+    size=${#fieldsArr[*]}
+    newRow=''
+    # echo $size
+echo "${red}===================================${reset}"
+    echo "columns are   ${green}: ${fieldsArr[*]}${reset}"
+    echo "data type are ${green}: ${dataTypeArr[*]}${reset}"
+echo "${red}===================================${reset}"
+    for (( i = 0 ; i < $size; i++ ));do
+        read -p "${green} enter ${fieldsArr[$i]} value(${dataTypeArr[$i]}):${reset}  " colValue
+        vaildInput  ${dataTypeArr[$i]}  $colValue 
+        res=$?
+            if [[ $res == 1 ]];then
+            echo "${green}try again );${reset}"
+            Main
+            elif [[ $res == 0 ]];then
+                if [[ $i = 0 ]];then
+                vaildPK $colValue
+                fi
+            newRow+="$colValue:"
+            fi
+    done
+    echo "${green} row inserted successfully!! ${reset}"
+    echo $newRow >> ./DBMS/$DBNAME/$tablename
+    echo $newRow 
+
+
+
+
+
+fi
+
+}
+
 
 Main(){
 
@@ -151,8 +248,8 @@ select op in  createTable listTables dropTable "Insert into Table" "Select From 
     dropTable
     ;;
     "Insert into Table")
-    #call fun
-    echo "Insert into Table"
+    InsertIntoTable
+    # echo "Insert into Table"
     ;;
     "Select From Table")
     #call fun -> select menu
