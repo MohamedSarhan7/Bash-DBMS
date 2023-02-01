@@ -2,7 +2,9 @@
 createDBFolder(){
     db="DBMS"
     if [[ -d $db ]];then
-   echo Welcome
+   echo "========================"
+   echo         Welcome
+   echo "========================"
     else
     mkdir DBMS
     fi

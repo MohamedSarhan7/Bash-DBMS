@@ -10,11 +10,57 @@
 # # done
 
 
-for i in $(ls ./DBMS)
-do 
+# for i in $(ls ./DBMS)
+# do 
 
+# # echo $i
+# if [[ $i == "n" ]];then
 # echo $i
-if [[ $i == "n" ]];then
-echo $i
-fi
-done
+# fi
+# # done
+# f1="/etc/passwd"
+# f2="/etc/shadow"
+# while read line ;do
+# # echo ${f1:$line:1}
+# cut -d : -f1,3-7,9
+# done <<( $f1 $f2)
+
+
+
+checkColName(){
+colname=$1
+
+    st=0
+    while [[ $st = 0 ]]; do
+        if ! [[ $colname =~ ^[a-zA-Z]{1,}$ ]];then
+        echo "${red}not vaild ${reset}"
+        read -p "enter colname : " colname
+        else
+        st=1
+        fi
+    done
+    echo $st
+}
+
+read -p "enter colname : " colname
+checkColName  $colname
+
+# ====================================
+#  db menu
+# =========================================
+#   +    Create Database 
+#   +    List Databases
+#   +    Connect To Databases
+#   +    Drop Database
+#   +    Exit from Databse
+# =============================
+# table menu
+# =============================
+#   +    Create Table
+#   +    List Tables
+#        Drop Table
+#        Insert into Table
+#        Select From Table => 1-select all 2-select by col 3-select by row
+#        Delete From Table
+#        Update Table
+#   +    Return to main menu

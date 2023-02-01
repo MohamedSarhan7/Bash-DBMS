@@ -3,7 +3,7 @@ red=`tput setaf 1`
 green=`tput setaf 2`
 reset=`tput sgr0`
 # echo "${red}red text ${green}green ${reset}text"
-
+export DBNAME=''
 listDatabase(){
 dir="./DBMS"
 res=''
@@ -11,7 +11,8 @@ db=$(ls -l ./DBMS | wc -l)
 if find -- "$dir" -prune -type d -empty | grep -q '^'; then
     res="${red} no databases yet${reset}" 
 else
-    res=$(ls -l ./DBMS | grep "^d" |cut -d ' ' -f9)
+    #res=$(ls -l ./DBMS | grep "^d" |cut -d ' ' -f9)
+    res=$(ls -F ./DBMS | grep / | cut -d '/' -f1)
 fi
     echo "============ ${green}Databases${reset} ==============="
     echo "${green}$res ${reset}"
@@ -42,8 +43,38 @@ fi
 
 }
 
+connectToDB(){
+status=0 
+read -p "${green}enter DB name to connect : ${reset}" name
+for i in $(ls ./DBMS)
+do 
+if [[ $i ==  $name ]];then
+    status=1
+fi
+done
+
+
+if [[ $status == 1 ]];then
+echo "==============================="
+echo "${green}$name ${red} connected ${reset} "
+echo "==============================="
+DBNAME=$name
+sleep 1
+clear
+. ./Tablemenu
+
+else
+echo "==============================="
+echo "${red}$name not found ${reset} "
+echo "==============================="
+. ./DBmenu
+
+fi
+
+
+}
 dropDatabase(){
-    del=0 
+del=0 
 read -p "${red}enter DB name to Drop : ${reset}" name
 for i in $(ls ./DBMS)
 do 
@@ -78,16 +109,16 @@ select op in  createDB listDB connectToDB dropDB quit ;do
     listDatabase
     ;;
     connectToDB)
-    echo connect To DB
+    connectToDB
     ;;
     dropDB)
     dropDatabase
     ;;
     quit)
-    exit
+    exit 0
     ;;
     *)
-    echo invaild Input
+    echo "${red}Invaild Input${reset}"
     esac
 done
 

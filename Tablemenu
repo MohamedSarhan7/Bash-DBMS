@@ -1,0 +1,184 @@
+checkColName(){
+colname=$1
+    st=0
+    while [[ $st = 0 ]]; do
+        if ! [[ $colname =~ ^[a-zA-Z]{1,}$ ]];then
+        echo "${red}not vaild ${reset}"
+        read -p "enter colname : " colname
+        else
+        st=1
+        fi
+    done
+}
+
+TableData(){
+    read -p "${green}Enter number of column in $tablename : ${reset}" col
+    if [[ $col =~ ^[1-9] ]];then
+        echo  "meta : TN : "$tablename >> ./DBMS/$DBNAME/meta_$tablename/meta
+        echo  "meta : CN : "$col       >> ./DBMS/$DBNAME/meta_$tablename/meta
+        echo  "===================================="
+        echo  "The First Column is primary Key"
+        echo  "===================================="
+        read -p "Enter primary Key name : " colname
+        checkColName $colname
+        echo "primary key : 1 : $colname : int " >> ./DBMS/$DBNAME/meta_$tablename/meta
+        printf "$colname:" >> ./DBMS/$DBNAME/$tablename
+        index=2
+        ncol=$(($col))
+        while [[ $index -le $ncol ]];do
+            read -p "Enter column $index name : " colname
+            checkColName $colname
+            echo  "Type of Column $colname: "
+                        select datatype in int str;do
+                            case $datatype in
+                            int)
+                            colType="int"
+                            break;;
+                            str)
+                            colType="string"
+                            break;;
+                            *)
+                            echo "Wrong Choice!!!" ;;
+                            esac
+                        done
+            echo "Not primary key : $index : $colname : $datatype " >> ./DBMS/$DBNAME/meta_$tablename/meta
+            printf "$colname:" >> ./DBMS/$DBNAME/$tablename
+            index=$(($index+1))
+        done
+        printf "\n" >> ./DBMS/$DBNAME/$tablename
+        printf "=================\n" >> ./DBMS/$DBNAME/$tablename 
+        echo   "Table Created Successfully"
+        Main
+    else
+    echo "${red}not vaild input only number {1-9} ${reset}"
+    rm -r ./DBMS/$DBNAME/meta_$tablename
+    rm -r ./DBMS/$DBNAME/$tablename
+    echo "back to sa $DBNAME "
+    Main
+
+    fi
+}
+
+createTable(){
+    read -p "${green}Enter table name : ${reset}" tablename
+if [[ -z $tablename ]];then
+echo "
+===============================================
+${red}tabel name can not be empty ${reset}
+===============================================" 
+elif [[ -f ./DBMS/$DBNAME/$tablename ]];then
+echo "
+===============================================
+${red}there is tabel with same name  ${reset}
+===============================================" 
+elif [[ $tablename =~ ^[a-zA-Z]{1,}$ ]];then
+# mkdir $metaDir
+# touch $metaFile
+mkdir ./DBMS/$DBNAME/meta_$tablename
+touch ./DBMS/$DBNAME/meta_$tablename/meta
+touch ./DBMS/$DBNAME/$tablename
+echo "${green}$tablename created successfully ${reset}"
+TableData
+else 
+echo "${red}not vaild name ${reset}"
+fi
+
+
+}
+
+
+listTables(){
+    dir="./DBMS/$DBNAME"
+res=''
+if find -- "$dir" -prune -type d -empty | grep -q '^'; then
+    res="${red} no tables yet${reset}" 
+else
+    res=$(ls -F ./DBMS/$DBNAME | grep -v /)
+fi
+    echo "============ ${green}Tables${reset} ==============="
+    echo "${green}$res ${reset}"
+    echo "======================================"
+    
+
+}
+
+dropTable(){
+    del=0 
+read -p "${red}enter table name to Drop : ${reset}" name
+for i in $(ls ./DBMS/$DBNAME)
+do 
+if [[ $i ==  $name ]];then
+    rm -r ./DBMS/$DBNAME/$name
+    rm -r ./DBMS/$DBNAME/meta_$name
+    del=1
+fi
+done
+
+
+if [[ $del == 1 ]];then
+echo "==============================="
+echo "${green}$name ${red}table deleted ${reset} "
+echo "==============================="
+else
+echo "==============================="
+echo "${red}$name not found ${reset} "
+echo "==============================="
+
+fi
+Main
+}
+
+
+Main(){
+
+
+echo "===============================
+                $DBNAME
+===============================
+"
+
+PS3="Enter a choice: "
+
+select op in  createTable listTables dropTable "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "DB menu" quit ;do
+    case $op in 
+    createTable)
+    createTable
+    ;;
+    listTables)
+    listTables
+    ;;
+    dropTable)
+    dropTable
+    ;;
+    "Insert into Table")
+    #call fun
+    echo "Insert into Table"
+    ;;
+    "Select From Table")
+    #call fun -> select menu
+    echo "Select From Table" 
+    ;;
+    "Delete From Table")
+    #call fun
+    echo "Delete From Table"
+    ;;
+    "Update Table")
+    #call fun
+    echo "Update Table"
+    ;;
+    "DB menu")
+    clear
+    . ./DBmenu
+    ;;
+    quit)
+    exit 0
+    ;;
+    *)
+    echo "${red}Invaild Input${reset}"
+    esac
+done
+}
+
+Main
+
+
