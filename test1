@@ -24,14 +24,14 @@
 # # echo ${f1:$line:1}
 # cut -d : -f1,3-7,9
 # done <<( $f1 $f2)
-# arr=[]
-		array=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/user/meta_table/meta`)
-        datatype=(`awk -F":" '{if (NR>=3) print $4}' ./DBMS/user/meta_table/meta`)
-# echo "${array[*]}" #elements
-pk=(`awk -F":" '{print $1}' ./DBMS/user/table`)
-echo "${pk[*]}" #elements
+# # arr=[]
+# 		array=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/user/meta_table/meta`)
+#         datatype=(`awk -F":" '{if (NR>=3) print $4}' ./DBMS/user/meta_table/meta`)
+# # echo "${array[*]}" #elements
+# pk=(`awk -F":" '{print $1}' ./DBMS/user/table`)
+# echo "${pk[*]}" #elements
 
-echo "${#pk[*]}" #size
+# echo "${#pk[*]}" #size
 
 # for (( k = 0 ; k < $size; k++ ));do
 #     echo ${array[$k]}
@@ -45,9 +45,9 @@ echo "${#pk[*]}" #size
 # done
 
 
-dump(){
-    echo $1
-}
+# dump(){
+#     echo $1
+# }
 
 
 # dump ${array[1]}
@@ -117,3 +117,34 @@ dump(){
 #        Delete From Table
 #        Update Table
 #   +    Return to main menu
+
+
+selectOneRow(){
+    data=$1
+ awk -v id=$data -F ":" '{ if( $1 == id ){print $0}}' ./DBMS/user/table
+
+}
+#    sed -i "/1/d" $tabname
+# 
+# dd=`awk -v id=$data,d=$dd -F ":" '{ if( $1 == 40 ){print NR}}' ./DBMS/user/table`
+
+delete(){
+    data=$1
+    rowNum=`awk -v id=$data -F ":" '{ if( $1 == id ){print NR}}' ./DBMS/user/table`
+    if ! [[ -z $rowNum ]];then
+ sed -i $rowNum'd' ./DBMS/user/table
+ echo "row deleted"
+ else 
+ echo "row not found"
+ fi
+
+}
+
+delete 5
+# # file=${DBMS/$DBNAME/$table}
+# row=''
+# while read p; do
+# echo $p | cut -d ':' -f1
+# #   row=$( cut -d ':' -f1 )
+# done < ./DBMS/user/table
+# #   echo $row 

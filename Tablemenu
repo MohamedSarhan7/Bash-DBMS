@@ -42,12 +42,14 @@ TableData(){
                             esac
                         done
             echo "Normal Field : $index : $colname : $datatype " >> ./DBMS/$DBNAME/meta_$tablename/meta
-            printf "$colname:" >> ./DBMS/$DBNAME/$tablename
+            # printf "$colname:" >> ./DBMS/$DBNAME/$tablename
             index=$(($index+1))
         done
-        printf "\n" >> ./DBMS/$DBNAME/$tablename
-        printf "=================\n" >> ./DBMS/$DBNAME/$tablename 
-        echo   "Table Created Successfully"
+        # printf "\n" >> ./DBMS/$DBNAME/$tablename
+        # printf "=================\n" >> ./DBMS/$DBNAME/$tablename 
+        echo   "${green}Table Created Successfully${reset}"
+        sleep 1
+        clear
         Main
     else
     echo "${red}not vaild input only number {1-9} ${reset}"
@@ -125,6 +127,8 @@ echo "${red}$name not found ${reset} "
 echo "==============================="
 
 fi
+sleep 1
+clear
 Main
 }
 
@@ -224,6 +228,58 @@ echo "${red}===================================${reset}"
 fi
 
 }
+delete(){
+    data=$1
+    rowNum=`awk -v id=$data -F ":" '{ if( $1 == id ){print NR}}' ./DBMS/$DBNAME/$tablename`
+    if ! [[ -z $rowNum ]];then
+        sed -i $rowNum'd' ./DBMS/$DBNAME/$tablename
+        echo "============================="
+        echo "${green}row deleted${reset}"
+        echo "============================="
+    else 
+        echo "============================="
+        echo "${red}row not found${reset}"
+        echo "============================="
+    fi
+sleep 1    
+clear
+Main
+}
+DeleteFromTable(){
+    table=0 
+read -p "${green}enter table name: ${reset}" tablename
+if [[ -z $tablename ]];then
+    echo "============================="
+    echo  $red table name is required $reset 
+    echo "============================="
+else
+    for i in $(ls ./DBMS/$DBNAME);do 
+        if [[ $i ==  $tablename ]];then
+                table=1
+        fi
+    done
+
+    if [[ $table == 0 ]];then
+        echo "============================="
+        echo  $red $tablename not found $reset 
+        echo "============================="
+    else
+        read -p "${red}enter ID to delete ); ${reset}: " row
+        if [[ -z $row ]];then
+            echo "============================="
+            echo "${red}ID is required to delete );${reset}" 
+            echo "============================="
+        elif ! [[ $row =~ ^[1-9]{1,}$ ]];then
+            echo "============================="
+            echo "${red}ID only numbers );${reset}" 
+            echo "============================="
+        else 
+            delete $row
+        fi
+            
+    fi
+fi 
+}
 
 
 Main(){
@@ -256,8 +312,7 @@ select op in  createTable listTables dropTable "Insert into Table" "Select From 
     echo "Select From Table" 
     ;;
     "Delete From Table")
-    #call fun
-    echo "Delete From Table"
+    DeleteFromTable
     ;;
     "Update Table")
     #call fun
