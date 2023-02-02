@@ -56,6 +56,8 @@ TableData(){
     rm -r ./DBMS/$DBNAME/meta_$tablename
     rm -r ./DBMS/$DBNAME/$tablename
     echo "back to sa $DBNAME "
+    sleep 1
+    clear
     Main
 
     fi
@@ -167,8 +169,9 @@ vaildPK(){
     if [[  $1 == ${pk[$k]}  ]];then
         echo "${red}Primary  key can't be duplicated${reset}"
         echo "${green}try again );${reset}"
-        
-        Main
+            sleep 1
+            clear
+            Main
         
     
     fi
@@ -209,7 +212,9 @@ echo "${red}===================================${reset}"
         res=$?
             if [[ $res == 1 ]];then
             echo "${green}try again );${reset}"
-            Main
+                sleep 1
+                clear
+                Main
             elif [[ $res == 0 ]];then
                 if [[ $i = 0 ]];then
                 vaildPK $colValue
