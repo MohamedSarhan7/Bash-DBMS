@@ -462,8 +462,8 @@ select op in  createTable listTables dropTable "Insert into Table" "Select From 
     # echo "Insert into Table"
     ;;
     "Select From Table")
-    #call fun -> select menu
-    echo "Select From Table" 
+    clear
+    . ./selectMenu 
     ;;
     "Delete Menu")
     clear
