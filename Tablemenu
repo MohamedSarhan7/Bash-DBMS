@@ -172,7 +172,6 @@ vaildPK(){
             sleep 1
             clear
             Main
-        
     
     fi
     
@@ -286,18 +285,168 @@ else
 fi 
 }
 
+update(){
+    data=$1
+    rowNum=`awk -v id=$data -F ":" '{ if( $1 == id ){print NR}}' ./DBMS/$DBNAME/$tablename`
+    if ! [[ -z $rowNum ]];then
+        dataTypeArr=(`awk -F":" '{if (NR>=3) print $4}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+        fieldsArr=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+#  declare -a oldDataArr  
+        oldDataArr=(`awk -v id=$data  -F ":" '{ if( $1 == id ){for(i=1;i<NF;i++)print $i}}' ./DBMS/$DBNAME/$tablename`)
+        
+        
+        # sed -i $rowNum'd' ./DBMS/$DBNAME/$tablename
+
+        # declare -a newRowArr  
+        # ${#array[*]}
+
+        size=${#fieldsArr[*]}
+        # newsize=$(($size-1))
+        newRow="${oldDataArr[0]}:"
+
+        echo "${red}===================================${reset}"
+        echo "row data: ${green}( ${oldDataArr[*]} )${reset}"
+        echo "${red}===================================${reset}"
+        echo "columns are   ${green}: ${fieldsArr[*]} ${reset}"
+        echo "data type are ${green}: ${dataTypeArr[*]} ${reset}"
+        echo "${red}NOTE!! ${green}Hit Enter to Keep the old value ;)${reset}"
+        echo "${red}===================================${reset}"
+        for (( i = 1 ; i < $size; i++ ));do
+            echo "${green} old value of  ${fieldsArr[$i]} is : ${oldDataArr[$i]} " 
+            read -p "${green} enter ${fieldsArr[$i]} value(${dataTypeArr[$i]}):${reset}  " colValue
+            if ! [[ -z $colValue ]];then
+                vaildInput  ${dataTypeArr[$i]}  $colValue 
+                res=$?
+                if [[ $res == 1 ]];then
+                    echo "${green}try again );${reset}"
+                    sleep 1
+                    clear
+                    Main
+                elif [[ $res == 0 ]];then
+                newRow+="$colValue:"
+                
+                fi
+            else
+            newRow+="${oldDataArr[$i]}:"
+
+            fi    
+        done
+        echo "${green} row updated successfully!! ${reset}"
+        sed -i $rowNum'd' ./DBMS/$DBNAME/$tablename
+        echo $newRow >> ./DBMS/$DBNAME/$tablename
+        echo $newRow     
+    else 
+        echo "============================="
+        echo "${red}row not found${reset}"
+        echo "============================="
+    fi
+sleep 1    
+clear
+Main
+}
+
+UpdateRowFromTable(){
+    table=0 
+read -p "${green}enter table name: ${reset}" tablename
+if [[ -z $tablename ]];then
+    echo "============================="
+    echo  $red table name is required $reset 
+    echo "============================="
+else
+    for i in $(ls ./DBMS/$DBNAME);do 
+        if [[ $i ==  $tablename ]];then
+                table=1
+        fi
+    done
+
+    if [[ $table == 0 ]];then
+        echo "============================="
+        echo  $red $tablename not found $reset 
+        echo "============================="
+    else
+        read -p "${red}enter row ID ); ${reset}: " row
+        if [[ -z $row ]];then
+            echo "============================="
+            echo "${red}ID is required to delete );${reset}" 
+            echo "============================="
+        elif ! [[ $row =~ ^[1-9]{1,}$ ]];then
+            echo "============================="
+            echo "${red}ID only numbers );${reset}" 
+            echo "============================="
+        else 
+            update $row
+        fi
+            
+    fi
+fi 
+}
+deleteTableContent(){
+     table=0 
+read -p "${green}enter table name: ${reset}" tablename
+if [[ -z $tablename ]];then
+    echo "============================="
+    echo  $red table name is required $reset 
+    echo "============================="
+else
+    for i in $(ls ./DBMS/$DBNAME);do 
+        if [[ $i ==  $tablename ]];then
+                table=1
+        fi
+    done
+
+    if [[ $table == 0 ]];then
+        echo "============================="
+        echo  $red $tablename not found $reset 
+        echo "============================="
+    else
+        echo "${red}Deleting '$tablename' content ...${reset}"
+        sleep 2
+        truncate -s 0 ./DBMS/$DBNAME/$tablename
+        echo "============================="
+        echo  $green $tablename is Empty $reset 
+        echo "============================="
+        clear 
+        Main
+            
+    fi
+fi 
+}
+deleteMenu(){
+
+select op in  deleteTableContent deleteOneRow back quit ;do
+    case $op in 
+    deleteTableContent)
+    deleteTableContent
+    ;;
+    deleteOneRow)
+    DeleteFromTable
+    ;;
+    back)
+    clear
+    Main
+    ;;
+    quit)
+    exit 0
+    ;;
+    *)
+    echo "${red}Invaild Input${reset}"
+    esac
+done
+}
+
+
+
 
 Main(){
 
 
-echo "===============================
-                $DBNAME
-===============================
-"
+echo "${green}==============================="
+echo "              $DBNAME                  "
+echo "===============================${reset}"
 
 PS3="Enter a choice: "
 
-select op in  createTable listTables dropTable "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "DB menu" quit ;do
+select op in  createTable listTables dropTable "Insert into Table" "Select From Table" "Delete Menu" "Update Table" "DB menu" quit ;do
     case $op in 
     createTable)
     createTable
@@ -313,15 +462,17 @@ select op in  createTable listTables dropTable "Insert into Table" "Select From 
     # echo "Insert into Table"
     ;;
     "Select From Table")
-    #call fun -> select menu
-    echo "Select From Table" 
+    clear
+    . ./selectMenu 
     ;;
-    "Delete From Table")
-    DeleteFromTable
+    "Delete Menu")
+    clear
+    deleteMenu
     ;;
     "Update Table")
+    UpdateRowFromTable
     #call fun
-    echo "Update Table"
+    # echo "Update Table"
     ;;
     "DB menu")
     clear

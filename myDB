@@ -1,13 +1,20 @@
 #!/bin/bash
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
 createDBFolder(){
     db="DBMS"
     if [[ -d $db ]];then
-   echo "========================"
-   echo         Welcome
-   echo "========================"
+    clear
     else
     mkdir DBMS
     fi
+    clear
+   echo "${green}========================"
+   echo "        Welcome         "
+   echo "========================${reset}"
+    sleep 1
 . ./DBmenu
 }
 

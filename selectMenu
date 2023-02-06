@@ -1,0 +1,116 @@
+#!/bin/bash
+
+#  by Mohamed Amr
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+
+
+
+
+selectAll(){
+    fieldsArr=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+	echo ${fieldsArr[*]}
+    cat ./DBMS/$DBNAME/$tablename
+	
+}
+selectByRow(){
+    read -p "${green}enter ID: ${reset}" data
+    echo " "
+    if [[ -z $data ]];then
+        echo "${red}ID is required ${reset}"
+    else
+        filedData=(`awk -v id=$data  -F ":" '{ if( $1 == id ){for(i=1;i<NF;i++)print $i}}' ./DBMS/$DBNAME/$tablename`)
+        size=${#filedData[*]}
+
+        if [[ $size>=1 ]];then
+            fieldsArr=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+	        echo ${fieldsArr[*]}
+
+            echo "${green}${filedData[*]}${reset}"
+        else
+        echo "${red}ID not found"
+        echo "sorry${reset}"
+        echo ""
+        sleep 1 
+        clear
+        Tablemenu
+        
+        fi
+    fi            
+}
+
+
+selectByColumn(){
+
+    fieldsArr=(`awk -F":" '{if (NR>=3) print $3}' ./DBMS/$DBNAME/meta_$tablename/meta`)
+    fieldsSize=${#fieldsArr[*]}
+    temp=0
+    for (( k = 0 ; k < $fieldsSize ; k++ ));do
+        temp=$(($k+1))
+        echo "${temp}) ${fieldsArr[$k]}"
+    done
+
+    read -p "Enter column number : " columnNum
+    if [[ $columnNum>$fieldsSize ]];then
+        echo "${red}Invaild Input${reset}"
+        echo $columnNum
+        sleep 1
+        clear
+        Tablemenu
+    elif [[ $columnNum -eq 0 ]];then
+        echo $columnNum
+        echo "${red}Invaild Input${reset}"
+        sleep 1
+        clear
+        Tablemenu
+    else
+        echo "${fieldsArr[$(($columnNum-1))]}"
+        echo "${green}"
+        awk -F ":" '{print $'$columnNum'}' ./DBMS/$DBNAME/$tablename
+         echo "${reset}"
+    fi    
+}
+
+selectMenu(){
+    select choice in "Select all" "Select by row" "Select by column" back
+	do 
+	case $choice in 
+	"Select all") 
+	selectAll
+	;; 
+	"Select by row") 
+	selectByRow
+	;; 
+	"Select by column") 
+	selectByColumn
+	;;
+    back)
+    clear
+    . ./Tablemenu
+    ;;
+	*)  echo "${red}Invaild Input${reset}"
+	;;
+	 esac 
+	 done
+}
+
+read -p "${green}enter table name: ${reset}" tablename
+    table=0 
+
+for i in $(ls ./DBMS/$DBNAME);do 
+    if [[ $i ==  $tablename ]];then
+            table=1
+    fi
+done
+
+if [[ $table == 0 ]];then
+    echo "============================="
+    echo  $red $tablename not found $reset 
+    echo "============================="
+    sleep 1 
+    clear
+    Tablemenu
+else
+selectMenu
+fi
